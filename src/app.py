@@ -44,14 +44,19 @@ def get_process_list():
 
 @bottle.post('/api/v1/memory')
 def read_process_memory():
-    pid = bottle.request.json['pid']
+    pid = int(bottle.request.json['pid'])
     address = bottle.request.json['address']
-    size = bottle.request.json['size']
+    size = int(bottle.request.json['size'])
 
     hProcess = memory.inject_process(pid)
-    data = memory.read_process(hProcess, address, size)
+    addr_bytes = bytes.fromhex(memory.address_to_hex_byte(address))
+    base_addr = memory.bytes_to_int(addr_bytes, len(addr_bytes))
+    log.debug("read %d memory from %s[%x] %d bytes" % (pid, address, base_addr, size))
+    buf = memory.read_process(hProcess, base_addr, size)
     memory.close_process(hProcess)
 
+    r = memory.bytes_to_hex_str(buf)
+    data = [r[i:i+2] for i in range(0, len(r), 2)]
     return render_json({'data': data})
 
 
@@ -61,11 +66,22 @@ def convert_bytes2str():
     将字节转为字符串
     """
     data = bottle.request.json['data']
-    coding = bottle.request.json['coding'] or 'gbk'
+    coding = bottle.request.json.get('coding') or 'gbk'
 
     ret = memory.hex_byte_to_str(data, coding)
     return render_json({'data': ret})
 
+
+@bottle.post('/api/v1/str2bytes')
+def convert_bytes2():
+    """
+    将字符串转为字节
+    """
+    data = bottle.request.json['data']
+    coding = bottle.request.json.get('coding') or 'gbk'
+
+    ret = memory.str_to_hex_byte(data, coding)
+    return render_json({'data': ret})
 
 
 if __name__ == '__main__':

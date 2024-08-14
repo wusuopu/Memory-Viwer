@@ -1,0 +1,25 @@
+<div>
+  <div class="flex flex-row items-center gap-3 mb-4">
+    <span>别名：</span>
+    <div>
+      <el-input v-model="alias" placeholder="" maxlength="16" show-word-limit />
+    </div>
+
+    <span>内存地址：</span>
+    <div>
+      <el-input v-model="addr" placeholder="输入16进制的内存地址" maxlength="16" show-word-limit />
+    </div>
+
+    <span>内存大小：</span>
+    <el-input-number v-model="size" :min="1" />
+
+    <el-button type="success" @click="addItem">
+      <el-icon><Plus /></el-icon>
+      新增查看项
+    </el-button>
+  </div>
+
+  <div class="flex flex-col items-center gap-3">
+    <ViewerItem v-for="(item, index) in items" :key="index" :pid="pid" :alias="item.alias" :addr="item.addr" :size="item.size" @delete="handleDelete(item, index)" />
+  </div>
+</div>

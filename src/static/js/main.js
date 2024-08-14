@@ -1,6 +1,6 @@
 $(async function(){
   async function readTemplate(name) {
-    let resp = await fetch(`/static/templates/${name}`)
+    let resp = await fetch(`/static/templates/${name}?t=${CURRENT_REQUEST_ID}`)
     return resp.text();
   }
   async function LoadComponent(name) {
@@ -14,6 +14,11 @@ $(async function(){
   const components = {
     MainLayout: await LoadComponent('MainLayout'),
     HomePage: await LoadComponent('HomePage'),
+    Viewer: await LoadComponent('Viewer'),
+    ViewerItem: await LoadComponent('ViewerItem'),
+    Plus: ElementPlusIconsVue.Plus,
+    ArrowRight: ElementPlusIconsVue.ArrowRight,
+    ArrowLeft: ElementPlusIconsVue.ArrowLeft,
   }
   _.each(components, (item) => {
     // 根据名字查找对应的组件

@@ -27,6 +27,7 @@ def bundle_assets():
         "lodash-4.17.21.js",
         "tailwindcss-3.4.5.js",
         "element-plus.js",
+        "element-plus-icons.js",
     ]
     with open(os.path.join(JS_DIR, 'bundle.js'), 'w') as out:
         for f in js_files:

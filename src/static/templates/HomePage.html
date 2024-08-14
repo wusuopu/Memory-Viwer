@@ -1,0 +1,41 @@
+<div>
+  <div class="flex flex-row items-center gap-2 mb-2">
+    <h2>进程列表</h2>
+    <el-button type="success" @click="refresh">刷新列表</el-button>
+    <el-button type="primary" :disabled="!currentRow" @click="inject">打开进程</el-button>
+  </div>
+  <el-table :data="processes" height="300" border style="width: 100%" highlight-current-row @current-change="handleCurrentChange">
+    <el-table-column type="index" label="编号" width="50" />
+    <el-table-column prop="pid" label="进程PID" width="190" sortable />
+    <el-table-column prop="exe" label="进程名" sortable />
+    <el-table-column prop="name" label="文件名" />
+  </el-table>
+
+  <div class="flex flex-row my-2">
+    <div class="flex-1">
+      <el-input v-model="byteData" :rows="5" type="textarea" placeholder="输入16进制字节数据" class="w-full" />
+    </div>
+    <div class="flex flex-col gap-2 justify-center px-3">
+      <el-select v-model="coding" class="w-full">
+        <el-option value="utf8">utf8</el-option>
+        <el-option value="gbk">gbk</el-option>
+      </el-select>
+
+      <div>
+        <el-button class="w-full" @click="convertBytes2Str">字节转字符串<el-icon><ArrowRight /></el-icon></el-button>
+      </div>
+      <div>
+        <el-button class="w-full" @click="convertStr2Bytes"><el-icon><ArrowLeft /></el-icon>字符串转字节</el-button>
+      </div>
+    </div>
+    <div class="flex-1">
+      <el-input v-model="strData" :rows="5" type="textarea" placeholder="转入字符串数据" class="w-full" />
+    </div>
+  </div>
+
+  <el-tabs v-model="currentTabValue" type="card" closable @tab-remove="handleRemoveTab">
+    <el-tab-pane v-for="item in attached" :key="item" :label="`进程(${item})`" :name="item">
+      <Viewer :pid="item" />
+    </el-tab-pane>
+  </el-tabs>
+</div>

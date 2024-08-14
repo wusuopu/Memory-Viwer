@@ -5,6 +5,7 @@ import ctypes
 import ctypes.wintypes
 import platform
 import struct
+import binascii
 
 if platform.machine().endswith('64'):
     # 64位系统
@@ -83,6 +84,26 @@ def bytes_to_int(b, size=4, unsigned=True):
     return struct.unpack(f, b)[0]
 
 
+def int_to_bytes(i, size=4, unsigned=True):
+    """将整数转为字节"""
+    # char
+    f = '<B' if unsigned else 'b'
+    if size == 8:       # long long
+        f = '<Q' if unsigned else 'q'
+    if size == 4:       # int
+        f = '<I' if unsigned else 'i'
+    if size == 2:       # short
+        f = '<H' if unsigned else 'h'
+    return struct.pack(f, i)
+
+
+def bytes_to_hex_str(buf):
+    """
+    b'\xAB\xCD' => 'ABCD'
+    """
+    return binascii.hexlify(buf).decode('utf8')
+
+
 def hex_byte_to_str(data, coding='gbk'):
     """
     将16进制的字节数据转为字符串
@@ -95,26 +116,29 @@ def str_to_hex_byte(data, coding='gbk'):
     将字符串转为16进制的字节数据
     """
     b = data.encode(coding)
-    r = b.hex().upper()
+    r = bytes_to_hex_str(b).upper()
     return ' '.join(r[i:i+2] for i in range(0, len(r), 2))
 
 def hex_byte_to_address(data):
+    """
+    例： "00 34 61 7F" => "7F613400"
+    """
     l = data.split()
     l.reverse()
     return ''.join(l)
 
-
-def int_to_bytes(i, size=4, unsigned=True):
-    """将整数转为字节"""
-    # char
-    f = '<B' if unsigned else 'b'
-    if size == 8:       # long long
-        f = '<Q' if unsigned else 'q'
-    if size == 4:       # int
-        f = '<I' if unsigned else 'i'
-    if size == 2:       # short
-        f = '<H' if unsigned else 'h'
-    return struct.pack(f, i)
+def address_to_hex_byte(data):
+    """
+    例：'7F613400' => '0034617F00'
+    """
+    if len(data) < 8:
+        num = 8
+    else:
+        num = 16
+    r = ((num - len(data)) * '0') + data
+    l = [r[i:i+2] for i in range(0, len(r), 2)]
+    l.reverse()
+    return ''.join(l)
 
 
 def array_to_list(value):
@@ -200,7 +224,7 @@ def get_process_name(pid):
     ctypes.windll.kernel32.CloseHandle(hProcess)
     try:
         result = name.value.decode("utf8")
-    except expression as identifier:
+    except Exception as e:
         result = name.value.decode("gbk")
     return result
 
@@ -309,13 +333,15 @@ def get_system_info():
         'end_addr': sysinfo.lpMaximumApplicationAddress
     }
 
+ReadProcessMemory = ctypes.windll.kernel32.ReadProcessMemory
+ReadProcessMemory.argtypes = ctypes.wintypes.HANDLE, ctypes.wintypes.LPCVOID, ctypes.wintypes.LPVOID, SIZE_T, ctypes.POINTER(SIZE_T)
+ReadProcessMemory.restype = ctypes.wintypes.BOOL
 
 def read_process(hProcess, base_addr, byte_num=2):
     """读取特定内存的值"""
     buf = ctypes.c_buffer(b'', byte_num)
-
     nread = SIZE_T()
-    ret = ctypes.windll.kernel32.ReadProcessMemory(
+    ret = ReadProcessMemory(
         hProcess,
         base_addr,
         ctypes.byref(buf),
