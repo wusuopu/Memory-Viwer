@@ -38,7 +38,7 @@
     </div>
     <div v-if="duplicateContent.length > 0" class="flex-1 flex flex-col flex-nowrap">
       <div v-for="(item, index) in addrRows" :key="index" class="flex-1">
-        <span v-for="i in 16" :key="i" :class="`inline-block w-[30px] pl-[5px] ${compareClassName(index, i-1, true)}`">{{ getChunkValue(index, i-1) }}</span>
+        <span v-for="i in 16" :key="i" :class="`inline-block w-[30px] pl-[5px] ${compareClassName(index, i-1, true)}`">{{ getChunkValue2(index, i-1) }}</span>
       </div>
     </div>
   </div>

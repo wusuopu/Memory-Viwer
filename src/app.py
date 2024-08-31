@@ -19,7 +19,7 @@ PID = None          # 当前游戏进程ID
 PROCESS = None      # 当前游戏进程句柄
 IS_HD = None
 
-VERSION = '20240814'
+VERSION = '20240831'
 
 
 def render_json(data, status=200):
